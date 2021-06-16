@@ -1,0 +1,6 @@
+<launch>
+    <rosparam command="load" file="$(find testforopencv)/settings.yaml"/>
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch"/>
+    <node pkg="testforopencv" name="sensortocv" type="sensortocv">
+    </node>
+</launch>
