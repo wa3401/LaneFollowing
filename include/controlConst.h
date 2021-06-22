@@ -11,12 +11,11 @@ using namespace std;
 using namespace cv;
 double slope(Point first, Point second);
 
-class Control
+class ControlConst
 {
 public:
     static vector<double> steerSpeed(vector<vector<double>> yellowLaneLines, vector<vector<double>> whiteLaneLines, int laneNumber)
     {
-
         double steeringAngle;
         double carSpeed;
         double laneMidPointCorrectionCoefficient = (M_PI / 6) / 640 * 1.25;
@@ -25,13 +24,8 @@ public:
         double TURN_CONST_SOFT_OUT = 4.0;
         double TURN_CONST_HARD_IN = 2.5;
         double TURN_CONST_SOFT_IN = 3.5;
-        double CENT_CORR_CONST = -0.00025;
-        double SPEED_CONST = 1.0;
-        double SPEED_DIVIDE = 6.0;
-        double MAX_SPEED = 0.75 + SPEED_CONST;
-        double STEER_SPEED_CONST_OUT = 0.05;
-        double STEER_SPEED_CONST_IN = 0.07;
-
+        double CENT_CORR_CONST = -0.0005;
+        double SPEED_CONST = 0.75;
 
         //Right Lane
         if (static_cast<int>(yellowLaneLines.size()) >= 1 && static_cast<int>(whiteLaneLines.size()) >= 1)
@@ -54,7 +48,7 @@ public:
             double difInSlope = abs(wSlope) - abs(ySlope);
             double avgSlope = (wSlope + ySlope) / 2 + difInSlope / 2;
             steeringAngle = 0.4 * tanh(avgSlope / TURN_CONST_HARD_OUT) + CENT_CORR_CONST * distFromCenter;
-            carSpeed = 0.75 + SPEED_CONST * tanh(abs(1 / avgSlope) / SPEED_DIVIDE);
+            carSpeed = SPEED_CONST;
         }
         //Inside lanes
         else if (static_cast<int>(whiteLaneLines.size()) == 0 && static_cast<int>(yellowLaneLines.size()) >= 1)
@@ -102,23 +96,7 @@ public:
             {
                 steeringAngle += CENT_CORR_CONST * (125 - yXCoord);
             }
-            carSpeed = 0.75 + SPEED_CONST * tanh(abs(1 / ySlope) / SPEED_DIVIDE);
-
-            double speedCorrection = (carSpeed / 0.75);
-
-            steeringAngle *= sqrt(speedCorrection);
-
-            // if (steeringAngle < 0)
-            // {
-            //     steeringAngle -= speedCorrection;
-            //     ROS_INFO("SPEED CORRECTION: -%s", std::to_string(speedCorrection).c_str());
-            // }
-            // else
-            // {
-            //     steeringAngle += speedCorrection;
-            //     ROS_INFO("SPEED CORRECTION: %s", std::to_string(speedCorrection).c_str());
-            // }
-            
+            carSpeed = SPEED_CONST;
         }
         //Outside Lanes
         else if (static_cast<int>(yellowLaneLines.size()) == 0 && static_cast<int>(whiteLaneLines.size()) >= 1)
@@ -166,25 +144,7 @@ public:
             {
                 steeringAngle += CENT_CORR_CONST * (125 - wXCoord);
             }
-            carSpeed = 0.75 + SPEED_CONST * tanh(abs(1 / wSlope) / SPEED_DIVIDE);
-
-            //double speedCorrection = STEER_SPEED_CONST_OUT * (carSpeed / 0.75);
-
-            double speedCorrection = (carSpeed / 0.75);
-
-            steeringAngle *= sqrt(speedCorrection);
-
-
-            // if (steeringAngle < 0)
-            // {
-            //     steeringAngle -= speedCorrection;
-            //     ROS_INFO("SPEED CORRECTION: -%s", std::to_string(speedCorrection).c_str());
-            // }
-            // else
-            // {
-            //     steeringAngle += speedCorrection;
-            //     ROS_INFO("SPEED CORRECTION: %s", std::to_string(speedCorrection).c_str());
-            // }
+            carSpeed = SPEED_CONST;
         }
         else
         {
@@ -199,23 +159,45 @@ public:
                 ROS_INFO("RIGHT LANE, TURNING LEFT TO REAQUIRE LANES");
                 steeringAngle = -0.2;
             }
-            carSpeed = 0.75;
+            carSpeed = SPEED_CONST;
         }
-
-        // if(abs(steeringAngle) < 0.1){
-        //     carSpeed = 2.0;
-        // } else if(abs(steeringAngle) < 0.25){
-        //     carSpeed = 1.5;
-        // } else if(abs(steeringAngle) < 0.35){
-        //     carSpeed = 1.0;
-        // } else{
-        //     carSpeed = 0.75;
-        // }
 
         vector<double> speedSteer;
         speedSteer.push_back(carSpeed);
         speedSteer.push_back(steeringAngle);
 
         return speedSteer;
+    }
+
+    static int
+    laneFinder(vector<vector<double>> wLines, vector<vector<double>> yLines, int lane)
+    {
+        int laneFind = lane;
+        if (laneFind > -2)
+        {
+            if (yLines.size() > 0)
+            {
+                if (yLines.at(0).at(0) > 480)
+                {
+                    laneFind = 0;
+                }
+                else
+                {
+                    laneFind = 1;
+                }
+            }
+            else if (wLines.size() > 0)
+            {
+                if (wLines.at(0).at(0) < 480)
+                {
+                    laneFind = 0;
+                }
+                else
+                {
+                    laneFind = 1;
+                }
+            }
+        }
+        return laneFind;
     }
 };

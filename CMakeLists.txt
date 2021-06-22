@@ -12,6 +12,10 @@ include_directories(
  ${catkin_INCLUDE_DIRS}
  ${OpenCV_INCLUDE_DIRS}
 )
-add_executable(sensortocv src/twoColorDetectionSpeed.cpp)
+add_executable(sensortocv src/twoColorDetection.cpp)
 add_dependencies(sensortocv ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(sensortocv ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(traindata src/getTrainingData.cpp)
+add_dependencies(traindata ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(traindata ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})

@@ -1,5 +1,5 @@
 <launch>
-    <node pkg="rosbag" type="play" name="rosbag" args="-d 2 /home/redcar/bagfiles/2021-06-15-10-47-01.bag"/>
+    <node pkg="rosbag" type="play" name="rosbag" args="-d 2 /home/redcar/bagfiles/subset.bag"/>
     <node name="extract" pkg="image_view" type="extract_images" respawn="false" output="screen" cwd="ROS_HOME">
 <remap from="image" to="/camera/color/image_raw"/>
     </node>
